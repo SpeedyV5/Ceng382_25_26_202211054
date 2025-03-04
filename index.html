@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ronaldo Fanpage</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif; 
+        }
+
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('ronaldo2.jpg') no-repeat center center;
+            background-size: cover;
+            transition: background 0.5s ease-in-out;
+            z-index: -1;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #ff0000;
+            width: 500px;
+            height: 200px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 10px  rgba(20, 117, 0, 0.5);
+        }
+
+        h2 {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 50%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* Futbol topu (Login Butonu) */
+        .login-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: absolute;
+            top: 31%; /* Yüksekliği %50'ye yerleştiriyoruz */
+            left: 85%; /* Soldan %50'ye yerleştiriyoruz */
+            transform: translate(-50%, -50%); /* Butonu tam ortalamak için */
+            background: url('https://raw.githubusercontent.com/Yousuke777/texture/main/soccer-ball-02.png') repeat;
+            background-size: 200%;
+            box-shadow: -10px -5px 20px rgba(0, 0, 0, 0.75) inset;
+            animation: rotate-anim 2s linear infinite;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.5s ease-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-text {
+            position: absolute;
+            top: 0;
+            font-size: 14px;
+            color: rgb(0, 0, 0);
+            font-weight: bold;
+            transform: translateY(-25px); /* Butonun hemen üstünde olmasını sağlar */
+            z-index: 1;
+        }
+        .login-btn:after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -5px;
+            margin: auto;
+            width: 40px;
+            height: 5px;
+            border-radius: 50%;
+            background: #000;
+            filter: blur(3px);
+            z-index: -1;
+        }
+
+        @keyframes rotate-anim {
+            100% {
+                background-position: -100% 0;
+            }
+        }
+        body:active .login-btn {
+            transform: translate(-50%, -50%) scale(2) translateX(200px); /* Topu büyütüp yukarıya kaydırır */
+        }
+
+
+        .club-logos {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .club {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        .manutd {
+            background-color: rgb(255, 0, 0);
+            border: 3px solid yellow;
+            background-image: url('manunt.png');
+        }
+
+        .juventus {
+            background-color: rgb(255, 255, 255);
+            border: 3px solid black;
+            background-image: url('jvs.png');
+        }
+
+        .realmadrid {
+            background-color: white;
+            border: 3px solid gold;
+            background-image: url('rlm.png');
+        }
+        #manutd:target ~ .login-container {
+            box-shadow: 0 4px 10px  rgba(255, 0, 0, 0.5);
+        }
+
+        #juventus:target ~ .login-container {
+            box-shadow: 0 4px 10px  rgba(0, 0, 0, 0.5);
+        }
+
+        #realmadrid:target ~ .login-container {
+            box-shadow: 0 4px 10px  rgba(255, 255, 255, 0.5);
+        }
+        /* Arka plan değişimi */
+        #manutd, #juventus, #realmadrid {
+            display: none;
+        }
+
+        #manutd:target ~ .background {
+            background: url('manutd-gif.gif') no-repeat center center !important;
+            background-size: cover !important;
+        }
+
+        #juventus:target ~ .background {
+            background: url('juventus-gif.gif') no-repeat center center !important;
+            background-size: cover !important;
+        }
+
+        #realmadrid:target ~ .background {
+            background: url('realmadrid-gif.gif') no-repeat center center !important;
+            background-size: cover !important;
+        }
+        .clock-container {
+            margin-top: -200px;
+            font-size: 36px;
+            font-weight: bold;
+            color: #004103;
+            text-align: left; /* Sola hizalama */
+            font-family: 'Poppins', sans-serif;
+            position: absolute; /* Konumlandırmayı bağımsız yap */
+            left: 800px; /* Sayfanın sol kenarına 20px mesafede */
+            top: 200px; /* Üstten de 20px mesafede */
+            transition: color 0.3s ease-in-out;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="manutd"></div>
+    <div id="juventus"></div>
+    <div id="realmadrid"></div>
+
+    <div class="background"></div>
+
+    <div class="login-container">
+        
+        <input type="text" placeholder="Fan ID">
+        <input type="password" placeholder="Password">
+
+        <!-- Futbol topu butonu -->
+        <button class="login-btn">
+            <span class="login-text">Login</span>
+        </button>
+
+        <div class="club-logos">
+            <a href="#manutd" class="club manutd"></a>
+            <a href="#juventus" class="club juventus"></a>
+            <a href="#realmadrid" class="club realmadrid"></a>
+        </div>
+    </div>
+        <div class="clock-container">
+        <span id="live-clock"></span>
+    </div>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('live-clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+    
+        function updateClockColor() {
+            const clock = document.getElementById('live-clock');
+    
+            if (window.location.hash === "#juventus") {
+                clock.style.color = "black";
+            } else if (window.location.hash === "#realmadrid") {
+                clock.style.color = "gold";
+            } else if (window.location.hash === "#manutd") {
+                clock.style.color = "red";
+            } 
+            else {
+                clock.style.color = "green"; // Varsayılan renk (Man Utd veya diğer sayfalar)
+            }
+        }
+    
+        // Saat güncelleme fonksiyonlarını başlat
+        setInterval(() => {
+            updateClock();
+            updateClockColor();
+        }, 1000);
+    
+        // Sayfa yüklendiğinde rengi hemen güncelle
+        updateClock();
+        updateClockColor();
+    
+        // URL hash değiştiğinde rengi güncelle
+        window.addEventListener("hashchange", updateClockColor);
+    </script>
+    <script>
+        document.addEventListener("keydown", function(event) {
+            if (event.key.toLowerCase() === "h") { // 'H' tuşuna basıldığında
+                const loginContainer = document.querySelector(".login-container"); // Login container'ı seç
+                loginContainer.style.display = (loginContainer.style.display === "none") ? "block" : "none";
+            }
+        });
+    </script>
+    
+    <script>
+        let loginData = []; // Kullanıcı giriş bilgilerini saklayan dizi
+    
+        document.addEventListener("DOMContentLoaded", function() {
+            const loginButton = document.querySelector(".login-btn");
+            const usernameInput = document.querySelector("input[type='text']");
+            const passwordInput = document.querySelector("input[type='password']");
+            
+            loginButton.addEventListener("mousedown", function(event) {
+                // Prevent default behavior and trigger login logic when mouse button is pressed
+                event.preventDefault();
+                
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+
+                if (username && password) { // If both fields are filled
+                    // Store the credentials in the array
+                    loginData.push({ username, password });
+                    console.log("All logins:", loginData); // Print the login data to console
+
+                    // Trigger the animation (since the login button is clicked)
+                    loginButton.classList.add("clicked");
+                } else {
+                    console.log("Please enter both username and password!");
+                }
+            });
+        });
+
+    </script>
+    
+    
+    
+    
+
+</body>
+</html>
