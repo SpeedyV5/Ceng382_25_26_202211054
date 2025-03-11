@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Information</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: url('ronaldo2.jpg') no-repeat center center; /* Resmin tam ortalanması */
+            background-size: cover; /* Resmin tam ekranı kaplamasını sağlamak */
+            color: #d4edda; /* Açık yeşil metin */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #a8e6cf; /* Açık pastel yeşil */
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            background-color: #245541; /* Daha koyu yeşil */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+            width: 80%;
+            max-width: 600px;
+        }
+
+        input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #1e5f40; /* Koyu yeşil çerçeve */
+            border-radius: 5px;
+            background-color: #183d2a;
+            color: #d4edda;
+            font-size: 16px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+            border-color: #57cc99; /* Açık yeşil vurgu */
+            background-color: #1c4733;
+        }
+
+        button {
+            background-color: #57cc99; /* Canlı yeşil buton */
+            color: #003d24;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #45b58a;
+        }
+
+        table {
+            width: 80%;
+            margin-top: 30px;
+            border-collapse: collapse;
+            background-color: #245541; /* Koyu yeşil tablo */
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #1e5f40;
+            color: #d4edda;
+        }
+
+        th {
+            background-color: #2b6a4f;
+        }
+
+        tr:nth-child(even) {
+            background-color: #245541;
+        }
+
+        tr:hover {
+            background-color: #316e53;
+        }
+
+        tr.selected {
+            background-color: #57cc99;
+            color: #003d24;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Class Information</h1>
+
+    <div class="form-container">
+        <form id="classForm">
+            <input type="text" id="className" placeholder="Class Name" required>
+            <input type="number" id="numPeople" placeholder="Number of People" required>
+            <textarea id="description" placeholder="Description" required></textarea>
+            <button type="submit">Add Class</button>
+        </form>
+
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <table id="classTable">
+        <thead>
+            <tr>
+                <th>Class Name</th>
+                <th>Number of People</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Class Entries will be added dynamically here -->
+        </tbody>
+    </table>
+
+    <script>
+        const classForm = document.getElementById('classForm');
+        const className = document.getElementById('className');
+        const numPeople = document.getElementById('numPeople');
+        const description = document.getElementById('description');
+        const classTable = document.getElementById('classTable').getElementsByTagName('tbody')[0];
+        const errorMessage = document.getElementById('errorMessage');
+
+        let classData = [];
+
+        classForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Form verilerini al
+            const classInfo = {
+                name: className.value.trim(),
+                people: numPeople.value.trim(),
+                description: description.value.trim()
+            };
+
+            // Veri doğrulama
+            if (!classInfo.name || !classInfo.people || !classInfo.description) {
+                errorMessage.textContent = "All fields are required!";
+                return;
+            }
+
+            errorMessage.textContent = ""; // Hata mesajını temizle
+
+            // Veriyi sınıf listesine ekle
+            classData.push(classInfo);
+            updateTable();
+            classForm.reset(); // Formu sıfırla
+        });
+
+        function updateTable() {
+            classTable.innerHTML = ''; // Eski verileri temizle
+
+            classData.forEach((item, index) => {
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.people}</td>
+                    <td>${item.description}</td>
+                `;
+
+                // Row tıklama eventi
+                row.addEventListener('click', function() {
+                    row.classList.toggle('selected');
+                    console.log('Class Info:', item);
+                });
+
+                // Row üzerinde fare ile gezerken arka plan rengini değiştirme
+                row.addEventListener('mouseover', function() {
+                    row.style.backgroundColor = '#316e53';
+                });
+
+                row.addEventListener('mouseout', function() {
+                    row.style.backgroundColor = '';
+                });
+
+                // Çift tıklama olayı (satırı silme)
+                row.addEventListener('dblclick', function() {
+                    classData.splice(index, 1); // Silinen öğeyi diziden çıkart
+                    updateTable(); // Tabloyu tekrar güncelle
+                });
+
+                classTable.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>

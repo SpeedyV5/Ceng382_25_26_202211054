@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ronaldo Fanpage</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- Dışarıdan CSS dosyasını dahil et -->
+    <link rel="stylesheet" href="style.css"> <!-- CSS dosyasının yolu buraya eklenecek -->
+
+</head>
+<body>
+
+    <div id="manutd"></div>
+    <div id="juventus"></div>
+    <div id="realmadrid"></div>
+
+    <div class="background"></div>
+
+    <div class="login-container">
+        
+        <input type="text" placeholder="Fan ID">
+        <input type="password" placeholder="Password">
+
+        <!-- Futbol topu butonu -->
+        <button class="login-btn">
+            <span class="login-text">Login</span>
+        </button>
+
+        <div class="club-logos">
+            <a href="#manutd" class="club manutd"></a>
+            <a href="#juventus" class="club juventus"></a>
+            <a href="#realmadrid" class="club realmadrid"></a>
+        </div>
+    </div>
+        <div class="clock-container">
+        <span id="live-clock"></span>
+    </div>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('live-clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+    
+        function updateClockColor() {
+            const clock = document.getElementById('live-clock');
+    
+            if (window.location.hash === "#juventus") {
+                clock.style.color = "black";
+            } else if (window.location.hash === "#realmadrid") {
+                clock.style.color = "gold";
+            } else if (window.location.hash === "#manutd") {
+                clock.style.color = "red";
+            } 
+            else {
+                clock.style.color = "green"; // Varsayılan renk (Man Utd veya diğer sayfalar)
+            }
+        }
+    
+        // Saat güncelleme fonksiyonlarını başlat
+        setInterval(() => {
+            updateClock();
+            updateClockColor();
+        }, 1000);
+    
+        // Sayfa yüklendiğinde rengi hemen güncelle
+        updateClock();
+        updateClockColor();
+    
+        // URL hash değiştiğinde rengi güncelle
+        window.addEventListener("hashchange", updateClockColor);
+    </script>
+    <script>
+        document.addEventListener("keydown", function(event) {
+            if (event.key.toLowerCase() === "h") { // 'H' tuşuna basıldığında
+                const loginContainer = document.querySelector(".login-container"); // Login container'ı seç
+                loginContainer.style.display = (loginContainer.style.display === "none") ? "block" : "none";
+            }
+        });
+    </script>
+    
+    <script>
+        let loginData = []; // Kullanıcı giriş bilgilerini saklayan dizi
+    
+        document.addEventListener("DOMContentLoaded", function() {
+            const loginButton = document.querySelector(".login-btn");
+            const usernameInput = document.querySelector("input[type='text']");
+            const passwordInput = document.querySelector("input[type='password']");
+            
+            loginButton.addEventListener("mousedown", function(event) {
+                // Prevent default behavior and trigger login logic when mouse button is pressed
+                event.preventDefault();
+                
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+
+                // Varsayılan giriş bilgileri (admin/admin)
+                const defaultUsername = "admin";
+                const defaultPassword = "admin";
+
+                if (username === defaultUsername && password === defaultPassword) {
+                    // Doğru giriş yapıldı, yönlendirme yapılacak
+                    window.location.href = "table.html";  // Yeni sayfanın URL'sini buraya ekleyin
+                } else {
+                    console.log("Yanlış kullanıcı adı veya şifre.");
+                    alert("Yanlış kullanıcı adı veya şifre!");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
