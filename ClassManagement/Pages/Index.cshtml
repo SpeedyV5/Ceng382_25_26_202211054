@@ -1,10 +1,68 @@
 ﻿@page
-@model IndexModel
+@model ClassManagement.Pages.IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Class Management";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-4">
+    <div class="row">
+        <!-- Form -->
+        <div class="col-md-4">
+            <h4>Add Class</h4>
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Class Name</label>
+                    <input type="text" class="form-control" asp-for="NewClass.ClassName">
+                    <span class="text-danger" asp-validation-for="NewClass.ClassName"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Student Count</label>
+                    <input type="number" class="form-control" asp-for="NewClass.StudentCount">
+                    <span class="text-danger" asp-validation-for="NewClass.StudentCount"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" asp-for="NewClass.Description"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" asp-page-handler="Add">Add Class</button>
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div class="col-md-8">
+            <h4>Class List</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Class Name</th>
+                        <th>Student Count</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in ClassManagement.Pages.IndexModel.ClassList)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.ClassName</td>
+                            <td>@item.StudentCount</td>
+                            <td>@item.Description</td>
+                            <td>
+                                <form method="post">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-warning btn-sm" asp-page-handler="Edit">Edit</button>
+                                    <button type="submit" class="btn btn-danger btn-sm" asp-page-handler="Delete">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
