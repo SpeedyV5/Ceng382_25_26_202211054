@@ -86,3 +86,15 @@ body {
   background-color: #c9a227;
   color: #1f3d1f;
 }
+.table td, .table th {
+  padding: 7px; /* Varsayılan genellikle 12px, bunu azalt */
+  font-size: 14px; /* Yazı boyutunu küçült */
+}
+
+@media (max-width: 768px) {
+  .table td, .table th {
+    padding: 4px; /* Küçük ekranlarda daha az boşluk bırak */
+    font-size: 13px;
+  }
+}
+

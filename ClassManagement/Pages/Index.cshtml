@@ -6,38 +6,86 @@
 
 <div class="container mt-4">
     <div class="row">
-        <!-- Form -->
-        <div class="col-md-4">
-            <h4>Add Class</h4>
-            <form method="post">
-                <div class="mb-3">
-                    <label class="form-label">Class Name</label>
-                    <input type="text" class="form-control" asp-for="NewClass.ClassName">
-                    <span class="text-danger" asp-validation-for="NewClass.ClassName"></span>
+        <!-- Sol tarafta Filtreleme Formu -->
+        <div class="col-md-6">
+            <h4>Filter Classes</h4>
+            <form method="get">
+                <div class="mb-2">
+                    <label for="searchClassName" class="form-label">Class Name</label>
+                    <input type="text" name="searchClassName" id="searchClassName" 
+                        value="@Request.Query["searchClassName"]" class="form-control" />
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Student Count</label>
-                    <input type="number" class="form-control" asp-for="NewClass.StudentCount">
-                    <span class="text-danger" asp-validation-for="NewClass.StudentCount"></span>
+                <div class="mb-2">
+                    <label for="minStudents" class="form-label">Min Students</label>
+                    <input type="number" name="minStudents" id="minStudents" 
+                        value="@Request.Query["minStudents"]" class="form-control" />
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" asp-for="NewClass.Description"></textarea>
+                <div class="mb-2">
+                    <label for="maxStudents" class="form-label">Max Students</label>
+                    <input type="number" name="maxStudents" id="maxStudents" 
+                        value="@Request.Query["maxStudents"]" class="form-control" />
                 </div>
-
-                <button type="submit" class="btn btn-primary" asp-page-handler="Add">Add Class</button>
+                <button type="submit" class="btn btn-primary">Filter</button>
             </form>
+
         </div>
 
-        <!-- Table -->
+        <!-- Sağ tarafta Add Class Formu -->
+        <div class="col-md-6">
+            <h4>Add Class</h4>
+            <form method="post">
+                <div class="mb-2">
+                    <label for="className" class="form-label">Class Name</label>
+                    <input type="text" asp-for="NewClass.ClassName" class="form-control" />
+                </div>
+                <div class="mb-2">
+                    <label for="studentCount" class="form-label">Student Count</label>
+                    <input type="number" asp-for="NewClass.StudentCount" class="form-control" />
+                </div>
+                <div class="mb-2">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea asp-for="NewClass.Description" class="form-control"></textarea>
+                </div>
+                <button type="submit" asp-page-handler="Add" class="btn btn-success">Add Class</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Sol tarafta Active Filters -->
+        <div class="col-md-4">
+            <h4>Active Filters</h4>
+            @if (!string.IsNullOrEmpty(Request.Query["searchClassName"]) || 
+                 !string.IsNullOrEmpty(Request.Query["minStudents"]) || 
+                 !string.IsNullOrEmpty(Request.Query["maxStudents"]))
+            {
+                <ul class="list-group">
+                    @if (!string.IsNullOrEmpty(Request.Query["searchClassName"]))
+                    {
+                        <li class="list-group-item">Class Name: @Request.Query["searchClassName"]</li>
+                    }
+                    @if (!string.IsNullOrEmpty(Request.Query["minStudents"]))
+                    {
+                        <li class="list-group-item">Min Students: @Request.Query["minStudents"]</li>
+                    }
+                    @if (!string.IsNullOrEmpty(Request.Query["maxStudents"]))
+                    {
+                        <li class="list-group-item">Max Students: @Request.Query["maxStudents"]</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No active filters</p>
+            }
+        </div>
+
+        <!-- Sağ tarafta Class List -->
         <div class="col-md-8">
             <h4>Class List</h4>
-            <table class="table table-striped">
-                <thead>
+            <table class="table table-bordered">
+                <thead class="table-warning">
                     <tr>
-                        <th>Id</th>
                         <th>Class Name</th>
                         <th>Student Count</th>
                         <th>Description</th>
@@ -45,24 +93,38 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in ClassManagement.Pages.IndexModel.ClassList)
+                    @foreach (var item in Model.FilteredData)
                     {
                         <tr>
-                            <td>@item.Id</td>
                             <td>@item.ClassName</td>
                             <td>@item.StudentCount</td>
                             <td>@item.Description</td>
                             <td>
                                 <form method="post">
                                     <input type="hidden" name="id" value="@item.Id" />
-                                    <button type="submit" class="btn btn-warning btn-sm" asp-page-handler="Edit">Edit</button>
-                                    <button type="submit" class="btn btn-danger btn-sm" asp-page-handler="Delete">Delete</button>
+                                    <button type="submit" asp-page-handler="Edit" class="btn btn-info btn-sm">Edit</button>
+                                    <button type="submit" asp-page-handler="Delete" class="btn btn-danger btn-sm">Delete</button>
                                 </form>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+
+            <!-- Sayfalama -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav>
+                    <ul class="pagination">
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="?pageIndex=@i">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
         </div>
     </div>
 </div>
