@@ -117,8 +117,23 @@
 
             </table>
 
-            <button type="button" asp-page-handler="ExportJson" class="btn btn-secondary">Export All JSON</button>
-            <button type="button" asp-page-handler="ExportFilteredJson" class="btn btn-secondary">Export Filtered JSON</button>
+            <form method="post">
+                <button type="submit" asp-page-handler="ExportJson" class="btn btn-secondary">Export All JSON</button>
+            </form>
+
+            <form method="post">
+                @foreach (var col in Model.SelectedColumns)
+                {
+                    <input type="hidden" name="selectedColumns" value="@col" />
+                }
+                <button type="submit" asp-page-handler="ExportFilteredJson" class="btn btn-secondary">Export Selected Coloumns JSON</button>
+            </form>
+            <form method="post">
+                <button type="submit" asp-page-handler="ExportFilteredJsonOnly" class="btn btn-secondary">Export Filtered JSON</button>
+            </form>
+
+
+
 
             <div class="mt-3">
                 <h5>Select Columns to Export</h5>
