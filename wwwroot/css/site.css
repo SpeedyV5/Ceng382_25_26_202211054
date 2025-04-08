@@ -1,0 +1,101 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+      font-size: 16px;
+  }
+}
+
+body {
+  background-color: #002b00; /* Koyu yeşil arka plan */
+  color: #f4e1c1; /* Açık krem yazılar */
+  margin-bottom: 60px;
+}
+
+.btn-primary {
+  background-color: #c9a227;
+  border-color: #b58f1d;
+  color: #1f3d1f;
+}
+
+.btn-primary:hover {
+  background-color: #b58f1d;
+  border-color: #a07e19;
+}
+
+.btn-secondary {
+  background-color: #f4e1c1;
+  border-color: #e0d0b0;
+  color: #1f3d1f;
+}
+
+.btn-secondary:hover {
+  background-color: #e0d0b0;
+  border-color: #c9b29a;
+}
+
+.btn-warning {
+  background-color: #3fa7a2;
+  border-color: #368f8b;
+  color: white;
+}
+
+.btn-warning:hover {
+  background-color: #368f8b;
+  border-color: #2f7e7a;
+}
+
+.btn-danger {
+  background-color: #8b1a22;
+  border-color: #78151d;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #78151d;
+  border-color: #650f17;
+}
+
+/* Form elemanları */
+.form-control {
+  background-color: #2a4a2a;
+  border: 1px solid #c9a227;
+  color: #f4e1c1;
+}
+
+.form-control:focus {
+  box-shadow: 0 0 0 0.2rem rgba(201, 162, 39, 0.5);
+}
+
+/* Tablo */
+.table {
+  color: #f4e1c1;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #2a4a2a;
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+  background-color: #355a35;
+}
+
+.table thead {
+  background-color: #c9a227;
+  color: #1f3d1f;
+}
+
+/* Yeni eklenen stil */
+.highlight-classname {
+  background-color: #d4edda; /* Greenish */
+}
+
+.highlight-studentcount {
+  background-color: #cce5ff; /* Blueish */
+}
+
+.highlight-description {
+  background-color: #fff3cd; /* Yellowish */
+}
