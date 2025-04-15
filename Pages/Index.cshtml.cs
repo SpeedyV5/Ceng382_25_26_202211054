@@ -20,8 +20,29 @@ namespace ClassManagement.Pages
         public int TotalPages { get; set; }
         public List<string> SelectedColumns { get; set; } = new List<string>();
 
+        private bool IsUserLoggedIn()
+        {
+            var sessionToken = HttpContext.Session.GetString("token");
+            var sessionUser = HttpContext.Session.GetString("username");
+            var sessionId = HttpContext.Session.GetString("session_id");
+
+            var cookieToken = Request.Cookies["token"];
+            var cookieUser = Request.Cookies["username"];
+            var cookieSessionId = Request.Cookies["session_id"];
+
+            return sessionToken != null && cookieToken != null &&
+                   sessionUser != null && cookieUser != null &&
+                   sessionId != null && cookieSessionId != null &&
+                   sessionToken == cookieToken &&
+                   sessionUser == cookieUser &&
+                   sessionId == cookieSessionId;
+        }
+
         public IActionResult OnGet(string searchClassName, int? minStudents, int? maxStudents, int pageIndex = 1, int pageSize = 6, List<string> selectedColumns = null)
         {
+            if (!IsUserLoggedIn())
+                return RedirectToPage("/Login");
+
             SelectedColumns = selectedColumns ?? new List<string>();
 
             var filteredList = ClassList.AsQueryable();
@@ -53,6 +74,9 @@ namespace ClassManagement.Pages
 
         public IActionResult OnPostAdd()
         {
+            if (!IsUserLoggedIn())
+                return RedirectToPage("/Login");
+
             if (!ModelState.IsValid)
                 return Page();
 
@@ -60,6 +84,7 @@ namespace ClassManagement.Pages
             NewClass.Id = newId;
             ClassList.Add(NewClass);
             NewClass = new ClassInformationModel();
+
             return RedirectToPage(new
             {
                 searchClassName = Request.Query["searchClassName"],
@@ -71,6 +96,9 @@ namespace ClassManagement.Pages
 
         public IActionResult OnPostDelete(int id)
         {
+            if (!IsUserLoggedIn())
+                return RedirectToPage("/Login");
+
             var item = ClassList.FirstOrDefault(x => x.Id == id);
             if (item != null)
                 ClassList.Remove(item);
@@ -86,24 +114,33 @@ namespace ClassManagement.Pages
 
         public IActionResult OnPostEdit(int id)
         {
+            if (!IsUserLoggedIn())
+                return RedirectToPage("/Login");
+
             var item = ClassList.FirstOrDefault(x => x.Id == id);
             if (item != null)
             {
                 ClassList.Remove(item);
                 NewClass = item;
             }
+
             return Page();
         }
 
         public IActionResult OnPostExportJson()
         {
+            if (!IsUserLoggedIn())
+                return RedirectToPage("/Login");
+
             var json = Utils.Instance.ExportToJson(ClassList);
             return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", "AllClasses.json");
         }
 
         public IActionResult OnPostExportFilteredJson(List<string> selectedColumns)
         {
-            // GET parametrelerini yeniden al
+            if (!IsUserLoggedIn())
+                return RedirectToPage("/Login");
+
             string searchClassName = Request.Query["searchClassName"];
             int.TryParse(Request.Query["minStudents"], out int minStudents);
             int.TryParse(Request.Query["maxStudents"], out int maxStudents);
@@ -127,7 +164,6 @@ namespace ClassManagement.Pages
                 Description = c.Description
             }).ToList();
 
-            // JSON oluştur
             var filteredJsonList = new List<Dictionary<string, object>>();
 
             foreach (var classItem in filteredData)
@@ -149,14 +185,16 @@ namespace ClassManagement.Pages
             var json = JsonSerializer.Serialize(filteredJsonList, new JsonSerializerOptions { WriteIndented = true });
             return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", "FilteredClasses.json");
         }
+
         public IActionResult OnPostExportFilteredJsonOnly()
         {
-            // Öncelikle filtreleme parametrelerini al
+            if (!IsUserLoggedIn())
+                return RedirectToPage("/Login");
+
             string? searchClassName = Request.Query["searchClassName"];
             bool hasMinStudents = int.TryParse(Request.Query["minStudents"], out int minStudents);
             bool hasMaxStudents = int.TryParse(Request.Query["maxStudents"], out int maxStudents);
 
-            // Filtreleme işlemi
             var filteredList = ClassList.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchClassName))
@@ -168,23 +206,15 @@ namespace ClassManagement.Pages
             if (hasMaxStudents)
                 filteredList = filteredList.Where(c => c.StudentCount <= maxStudents);
 
-            // **Eğer filtrelenmiş liste boşsa, boş JSON dön**
             var filteredData = filteredList.ToList();
             if (filteredData.Count == 0)
             {
                 return File(System.Text.Encoding.UTF8.GetBytes("[]"), "application/json", "FilteredClassesOnly.json");
             }
 
-            // **JSON olarak kaydetme**
             var json = JsonSerializer.Serialize(filteredData, new JsonSerializerOptions { WriteIndented = true });
 
             return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", "FilteredClassesOnly.json");
         }
-
-
-
-
-
-
     }
 }

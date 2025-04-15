@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "OOIDyIoS7devHgezeRU3TClHKSMOreYclL43w6/9koE=",
+  "Hash": "8deUzJwEf/twmbpgErQFV0T/Vyr+JnxB8P9noHCtL0o=",
   "Source": "ClassManagement",
   "BasePath": "_content/ClassManagement",
   "Mode": "Default",
@@ -91,6 +91,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "C:\\Ceng382_25_26_202211054\\ClassManagement\\wwwroot\\data\\users.json",
+      "SourceId": "ClassManagement",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Ceng382_25_26_202211054\\ClassManagement\\wwwroot\\",
+      "BasePath": "_content/ClassManagement",
+      "RelativePath": "data/users.json",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\data\\users.json"
     },
     {
       "Identity": "C:\\Ceng382_25_26_202211054\\ClassManagement\\wwwroot\\favicon.ico",
