@@ -1,9 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+using ClassManagement.Data; // DbContext'in olduğu namespace
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ➡️ Add services to the container:
 builder.Services.AddRazorPages();
 
-// ➕ Session middleware'i aktifleştir
+// ➡️ Add and configure the database context
+builder.Services.AddDbContext<SchoolDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
+
+// ➡️ Add Session middleware
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -13,7 +20,7 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ➡️ Configure the HTTP request pipeline:
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -22,12 +29,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
-// ➕ Session middleware'i devreye al
-app.UseSession();
-
+app.UseSession(); // Session middleware aktif
 app.UseAuthorization();
 
 app.MapRazorPages();

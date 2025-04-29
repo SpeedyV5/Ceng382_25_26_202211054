@@ -1,21 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using ClassManagement.Data;
 using ClassManagement.Models;
 using ClassManagement.Utilities;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace ClassManagement.Pages
 {
     public class IndexModel : PageModel
     {
-        public static List<ClassInformationModel> ClassList { get; set; } = new List<ClassInformationModel>();
+        private readonly SchoolDbContext _context;
+
+        public IndexModel(SchoolDbContext context)
+        {
+            _context = context;
+        }
 
         [BindProperty]
-        public ClassInformationModel NewClass { get; set; } = new ClassInformationModel();
+        public Class NewClass { get; set; } = new Class();
 
-        public List<ClassInformationTable> FilteredData { get; set; } = new List<ClassInformationTable>();
+        [BindProperty]
+        public int? EditClassId { get; set; }
+
+        public List<Class> FilteredData { get; set; } = new List<Class>();
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
         public List<string> SelectedColumns { get; set; } = new List<string>();
@@ -38,41 +49,51 @@ namespace ClassManagement.Pages
                    sessionId == cookieSessionId;
         }
 
-        public IActionResult OnGet(string searchClassName, int? minStudents, int? maxStudents, int pageIndex = 1, int pageSize = 6, List<string> selectedColumns = null)
+        public async Task<IActionResult> OnGetAsync(string searchClassName, int? minStudents, int? maxStudents, int pageIndex = 1, int pageSize = 10, List<string> selectedColumns = null, int? editClassId = null)
         {
             if (!IsUserLoggedIn())
                 return RedirectToPage("/Login");
 
             SelectedColumns = selectedColumns ?? new List<string>();
 
-            var filteredList = ClassList.AsQueryable();
+            var query = _context.Classes.Where(c => c.IsActive);
 
             if (!string.IsNullOrEmpty(searchClassName))
-                filteredList = filteredList.Where(c => c.ClassName.Contains(searchClassName));
+                query = query.Where(c => c.Name.Contains(searchClassName));
 
             if (minStudents.HasValue)
-                filteredList = filteredList.Where(c => c.StudentCount >= minStudents.Value);
+                query = query.Where(c => c.PersonCount >= minStudents.Value);
 
             if (maxStudents.HasValue)
-                filteredList = filteredList.Where(c => c.StudentCount <= maxStudents.Value);
+                query = query.Where(c => c.PersonCount <= maxStudents.Value);
 
-            var totalRecords = filteredList.Count();
-            FilteredData = filteredList.Skip((pageIndex - 1) * pageSize).Take(pageSize)
-                .Select(c => new ClassInformationTable
-                {
-                    Id = c.Id,
-                    ClassName = c.ClassName,
-                    StudentCount = c.StudentCount,
-                    Description = c.Description
-                }).ToList();
+            var totalRecords = await query.CountAsync();
+
+            FilteredData = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
 
             CurrentPage = pageIndex;
-            TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+            TotalPages = (int)System.Math.Ceiling(totalRecords / (double)pageSize);
+
+            // Eğer EditClassId varsa, formu doldur
+            if (editClassId.HasValue)
+            {
+                var editItem = await _context.Classes.FindAsync(editClassId.Value);
+                if (editItem != null)
+                {
+                    NewClass = new Class
+                    {
+                        Name = editItem.Name,
+                        PersonCount = editItem.PersonCount,
+                        Description = editItem.Description
+                    };
+                    EditClassId = editItem.Id;
+                }
+            }
 
             return Page();
         }
 
-        public IActionResult OnPostAdd()
+        public async Task<IActionResult> OnPostAddAsync()
         {
             if (!IsUserLoggedIn())
                 return RedirectToPage("/Login");
@@ -80,141 +101,72 @@ namespace ClassManagement.Pages
             if (!ModelState.IsValid)
                 return Page();
 
-            int newId = ClassList.Count > 0 ? ClassList.Max(x => x.Id) + 1 : 1;
-            NewClass.Id = newId;
-            ClassList.Add(NewClass);
-            NewClass = new ClassInformationModel();
+            NewClass.IsActive = true;
+            _context.Classes.Add(NewClass);
+            await _context.SaveChangesAsync();
 
-            return RedirectToPage(new
-            {
-                searchClassName = Request.Query["searchClassName"],
-                minStudents = Request.Query["minStudents"],
-                maxStudents = Request.Query["maxStudents"],
-                pageIndex = CurrentPage
-            });
+            return RedirectToPage();
         }
 
-        public IActionResult OnPostDelete(int id)
+        public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             if (!IsUserLoggedIn())
                 return RedirectToPage("/Login");
 
-            var item = ClassList.FirstOrDefault(x => x.Id == id);
-            if (item != null)
-                ClassList.Remove(item);
-
-            return RedirectToPage(new
-            {
-                searchClassName = Request.Query["searchClassName"],
-                minStudents = Request.Query["minStudents"],
-                maxStudents = Request.Query["maxStudents"],
-                pageIndex = CurrentPage
-            });
-        }
-
-        public IActionResult OnPostEdit(int id)
-        {
-            if (!IsUserLoggedIn())
-                return RedirectToPage("/Login");
-
-            var item = ClassList.FirstOrDefault(x => x.Id == id);
+            var item = await _context.Classes.FindAsync(id);
             if (item != null)
             {
-                ClassList.Remove(item);
-                NewClass = item;
+                item.IsActive = false;
+                _context.Classes.Update(item);
+                await _context.SaveChangesAsync();
             }
 
-            return Page();
+            return RedirectToPage();
         }
 
-        public IActionResult OnPostExportJson()
+
+        public async Task<IActionResult> OnPostEditAsync()
+{
+    if (!IsUserLoggedIn())
+        return RedirectToPage("/Login");
+
+    if (!ModelState.IsValid || EditClassId == null)
+        return RedirectToPage();
+
+    var item = await _context.Classes.FindAsync(EditClassId.Value);
+    if (item != null)
+    {
+        item.Name = NewClass.Name;
+        item.PersonCount = NewClass.PersonCount;
+        item.Description = NewClass.Description ?? string.Empty;
+        item.IsActive = true;
+
+        _context.Classes.Update(item);
+        await _context.SaveChangesAsync();
+    }
+
+    return RedirectToPage();
+}
+
+
+        public async Task<IActionResult> OnPostExportJsonAsync()
         {
             if (!IsUserLoggedIn())
                 return RedirectToPage("/Login");
 
-            var json = Utils.Instance.ExportToJson(ClassList);
+            var allClasses = await _context.Classes.ToListAsync();
+            var json = Utils.Instance.ExportToJson(allClasses);
             return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", "AllClasses.json");
         }
 
-        public IActionResult OnPostExportFilteredJson(List<string> selectedColumns)
+        public async Task<IActionResult> OnPostExportFilteredJsonAsync(List<string> selectedColumns)
         {
             if (!IsUserLoggedIn())
                 return RedirectToPage("/Login");
 
-            string searchClassName = Request.Query["searchClassName"];
-            int.TryParse(Request.Query["minStudents"], out int minStudents);
-            int.TryParse(Request.Query["maxStudents"], out int maxStudents);
-
-            var filteredList = ClassList.AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchClassName))
-                filteredList = filteredList.Where(c => c.ClassName.Contains(searchClassName));
-
-            if (Request.Query.ContainsKey("minStudents"))
-                filteredList = filteredList.Where(c => c.StudentCount >= minStudents);
-
-            if (Request.Query.ContainsKey("maxStudents"))
-                filteredList = filteredList.Where(c => c.StudentCount <= maxStudents);
-
-            var filteredData = filteredList.Select(c => new ClassInformationTable
-            {
-                Id = c.Id,
-                ClassName = c.ClassName,
-                StudentCount = c.StudentCount,
-                Description = c.Description
-            }).ToList();
-
-            var filteredJsonList = new List<Dictionary<string, object>>();
-
-            foreach (var classItem in filteredData)
-            {
-                var obj = new Dictionary<string, object>();
-
-                if (selectedColumns.Contains("ClassName"))
-                    obj["ClassName"] = classItem.ClassName;
-
-                if (selectedColumns.Contains("StudentCount"))
-                    obj["StudentCount"] = classItem.StudentCount;
-
-                if (selectedColumns.Contains("Description"))
-                    obj["Description"] = classItem.Description;
-
-                filteredJsonList.Add(obj);
-            }
-
-            var json = JsonSerializer.Serialize(filteredJsonList, new JsonSerializerOptions { WriteIndented = true });
+            var allClasses = await _context.Classes.ToListAsync();
+            var json = Utils.Instance.ExportToJson(allClasses, selectedColumns);
             return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", "FilteredClasses.json");
-        }
-
-        public IActionResult OnPostExportFilteredJsonOnly()
-        {
-            if (!IsUserLoggedIn())
-                return RedirectToPage("/Login");
-
-            string? searchClassName = Request.Query["searchClassName"];
-            bool hasMinStudents = int.TryParse(Request.Query["minStudents"], out int minStudents);
-            bool hasMaxStudents = int.TryParse(Request.Query["maxStudents"], out int maxStudents);
-
-            var filteredList = ClassList.AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchClassName))
-                filteredList = filteredList.Where(c => c.ClassName.Contains(searchClassName));
-
-            if (hasMinStudents)
-                filteredList = filteredList.Where(c => c.StudentCount >= minStudents);
-
-            if (hasMaxStudents)
-                filteredList = filteredList.Where(c => c.StudentCount <= maxStudents);
-
-            var filteredData = filteredList.ToList();
-            if (filteredData.Count == 0)
-            {
-                return File(System.Text.Encoding.UTF8.GetBytes("[]"), "application/json", "FilteredClassesOnly.json");
-            }
-
-            var json = JsonSerializer.Serialize(filteredData, new JsonSerializerOptions { WriteIndented = true });
-
-            return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", "FilteredClassesOnly.json");
         }
     }
 }
