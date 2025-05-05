@@ -38,12 +38,25 @@ namespace ClassManagement.Pages
                    sessionId == cookieSessionId;
         }
 
-        public IActionResult OnGet(string searchClassName, int? minStudents, int? maxStudents, int pageIndex = 1, int pageSize = 6, List<string> selectedColumns = null)
+        public IActionResult OnGet(string searchClassName, int? minStudents, int? maxStudents, int pageIndex = 1, int pageSize = 10, List<string> selectedColumns = null)
         {
+            if (ClassList.Count == 0)
+            {
+                for (int i = 1; i <= 100; i++)
+                {
+                    ClassList.Add(new ClassInformationModel
+                    {
+                        ClassName = $"Sample Class {i}",
+                        StudentCount = 10 + (i % 50),
+                        Description = $"This is sample class number {i}"
+                    });
+                }
+            }
             if (!IsUserLoggedIn())
                 return RedirectToPage("/Login");
 
             SelectedColumns = selectedColumns ?? new List<string>();
+
 
             var filteredList = ClassList.AsQueryable();
 
