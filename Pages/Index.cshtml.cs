@@ -20,8 +20,20 @@ namespace ClassManagement.Pages
         public int TotalPages { get; set; }
         public List<string> SelectedColumns { get; set; } = new List<string>();
 
-        public IActionResult OnGet(string searchClassName, int? minStudents, int? maxStudents, int pageIndex = 1, int pageSize = 6, List<string> selectedColumns = null)
+        public IActionResult OnGet(string searchClassName, int? minStudents, int? maxStudents, int pageIndex = 1, int pageSize = 10, List<string> selectedColumns = null)
         {
+            if (ClassList.Count == 0)
+            {
+                for (int i = 1; i <= 100; i++)
+                {
+                    ClassList.Add(new ClassInformationModel
+                    {
+                        ClassName = $"Sample Class {i}",
+                        StudentCount = 10 + (i % 50),
+                        Description = $"This is sample class number {i}"
+                    });
+                }
+            }
             SelectedColumns = selectedColumns ?? new List<string>();
 
             var filteredList = ClassList.AsQueryable();
@@ -56,7 +68,7 @@ namespace ClassManagement.Pages
             if (!ModelState.IsValid)
                 return Page();
 
-            int newId = ClassList.Count > 0 ? ClassList.Max(x => x.Id) + 1 : 1;
+            int newId = ClassList.Any() ? ClassList.Max(x => x.Id) + 1 : 1;
             NewClass.Id = newId;
             ClassList.Add(NewClass);
             NewClass = new ClassInformationModel();
@@ -121,7 +133,7 @@ namespace ClassManagement.Pages
 
             var filteredData = filteredList.Select(c => new ClassInformationTable
             {
-                Id = c.Id,
+                Id = c.Id-1,
                 ClassName = c.ClassName,
                 StudentCount = c.StudentCount,
                 Description = c.Description
@@ -149,37 +161,26 @@ namespace ClassManagement.Pages
             var json = JsonSerializer.Serialize(filteredJsonList, new JsonSerializerOptions { WriteIndented = true });
             return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", "FilteredClasses.json");
         }
-        public IActionResult OnPostExportFilteredJsonOnly()
-        {
-            // Öncelikle filtreleme parametrelerini al
-            string? searchClassName = Request.Query["searchClassName"];
-            bool hasMinStudents = int.TryParse(Request.Query["minStudents"], out int minStudents);
-            bool hasMaxStudents = int.TryParse(Request.Query["maxStudents"], out int maxStudents);
-
-            // Filtreleme işlemi
-            var filteredList = ClassList.AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchClassName))
-                filteredList = filteredList.Where(c => c.ClassName.Contains(searchClassName));
-
-            if (hasMinStudents)
-                filteredList = filteredList.Where(c => c.StudentCount >= minStudents);
-
-            if (hasMaxStudents)
-                filteredList = filteredList.Where(c => c.StudentCount <= maxStudents);
-
-            // **Eğer filtrelenmiş liste boşsa, boş JSON dön**
-            var filteredData = filteredList.ToList();
-            if (filteredData.Count == 0)
+            public IActionResult OnPostExportFilteredJsonOnly(string searchClassName, int? minStudents, int? maxStudents)
             {
-                return File(System.Text.Encoding.UTF8.GetBytes("[]"), "application/json", "FilteredClassesOnly.json");
+                var filteredList = ClassList.AsQueryable();
+
+                if (!string.IsNullOrEmpty(searchClassName))
+                    filteredList = filteredList.Where(c => c.ClassName.Contains(searchClassName));
+
+                if (minStudents.HasValue)
+                    filteredList = filteredList.Where(c => c.StudentCount >= minStudents.Value);
+
+                if (maxStudents.HasValue)
+                    filteredList = filteredList.Where(c => c.StudentCount <= maxStudents.Value);
+
+                var filteredData = filteredList.ToList();
+
+                var json = JsonSerializer.Serialize(filteredData, new JsonSerializerOptions { WriteIndented = true });
+
+                return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", "FilteredClassesOnly.json");
             }
 
-            // **JSON olarak kaydetme**
-            var json = JsonSerializer.Serialize(filteredData, new JsonSerializerOptions { WriteIndented = true });
-
-            return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", "FilteredClassesOnly.json");
-        }
 
 
 

@@ -13,17 +13,17 @@
                 <div class="mb-2">
                     <label for="searchClassName" class="form-label">Class Name</label>
                     <input type="text" name="searchClassName" id="searchClassName" 
-                        value="@Request.Query["searchClassName"]" class="form-control" />
+                           value="@Request.Query["searchClassName"]" class="form-control" />
                 </div>
                 <div class="mb-2">
                     <label for="minStudents" class="form-label">Min Students</label>
                     <input type="number" name="minStudents" id="minStudents" 
-                        value="@Request.Query["minStudents"]" class="form-control" />
+                           value="@Request.Query["minStudents"]" class="form-control" />
                 </div>
                 <div class="mb-2">
                     <label for="maxStudents" class="form-label">Max Students</label>
                     <input type="number" name="maxStudents" id="maxStudents" 
-                        value="@Request.Query["maxStudents"]" class="form-control" />
+                           value="@Request.Query["maxStudents"]" class="form-control" />
                 </div>
                 <button type="submit" class="btn btn-primary">Filter</button>
             </form>
@@ -34,15 +34,15 @@
             <h4>Add Class</h4>
             <form method="post">
                 <div class="mb-2">
-                    <label for="className" class="form-label">Class Name</label>
+                    <label class="form-label">Class Name</label>
                     <input type="text" asp-for="NewClass.ClassName" class="form-control" />
                 </div>
                 <div class="mb-2">
-                    <label for="studentCount" class="form-label">Student Count</label>
+                    <label class="form-label">Student Count</label>
                     <input type="number" asp-for="NewClass.StudentCount" class="form-control" />
                 </div>
                 <div class="mb-2">
-                    <label for="description" class="form-label">Description</label>
+                    <label class="form-label">Description</label>
                     <textarea asp-for="NewClass.Description" class="form-control"></textarea>
                 </div>
                 <button type="submit" asp-page-handler="Add" class="btn btn-success">Add Class</button>
@@ -91,30 +91,23 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                    <tbody>
-                        @foreach (var item in Model.FilteredData)
-                        {
-                            <tr>
-                                <!-- ClassName sütunu, seçili ise highlight-classname sınıfı eklenir -->
-                                <td class="@(Model.SelectedColumns.Contains("ClassName") ? "highlight-classname" : "")">@item.ClassName</td>
-                                
-                                <!-- StudentCount sütunu, seçili ise highlight-studentcount sınıfı eklenir -->
-                                <td class="@(Model.SelectedColumns.Contains("StudentCount") ? "highlight-studentcount" : "")">@item.StudentCount</td>
-                                
-                                <!-- Description sütunu, seçili ise highlight-description sınıfı eklenir -->
-                                <td class="@(Model.SelectedColumns.Contains("Description") ? "highlight-description" : "")">@item.Description</td>
-
-                                <td>
-                                    <form method="post">
-                                        <input type="hidden" name="id" value="@item.Id" />
-                                        <button type="submit" asp-page-handler="Edit" class="btn btn-info btn-sm">Edit</button>
-                                        <button type="submit" asp-page-handler="Delete" class="btn btn-danger btn-sm">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-
+                <tbody>
+                    @foreach (var item in Model.FilteredData)
+                    {
+                        <tr>
+                            <td class="@(Model.SelectedColumns.Contains("ClassName") ? "highlight-classname" : "")">@item.ClassName</td>
+                            <td class="@(Model.SelectedColumns.Contains("StudentCount") ? "highlight-studentcount" : "")">@item.StudentCount</td>
+                            <td class="@(Model.SelectedColumns.Contains("Description") ? "highlight-description" : "")">@item.Description</td>
+                            <td>
+                                <form method="post">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" asp-page-handler="Edit" class="btn btn-info btn-sm">Edit</button>
+                                    <button type="submit" asp-page-handler="Delete" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
             </table>
 
             <form method="post">
@@ -126,32 +119,32 @@
                 {
                     <input type="hidden" name="selectedColumns" value="@col" />
                 }
-                <button type="submit" asp-page-handler="ExportFilteredJson" class="btn btn-secondary">Export Selected Coloumns JSON</button>
-            </form>
-            <form method="post">
-                <button type="submit" asp-page-handler="ExportFilteredJsonOnly" class="btn btn-secondary">Export Filtered JSON</button>
+                <button type="submit" asp-page-handler="ExportFilteredJson" class="btn btn-secondary">Export Selected Columns JSON</button>
             </form>
 
-
-
+            <!-- ✅ Export Filtered JSON (searchClassName, min/maxStudents) -->
+            <form method="post" asp-page-handler="ExportFilteredJsonOnly">
+                <input type="hidden" name="searchClassName" value="@Request.Query["searchClassName"]" />
+                <input type="hidden" name="minStudents" value="@Request.Query["minStudents"]" />
+                <input type="hidden" name="maxStudents" value="@Request.Query["maxStudents"]" />
+                <button type="submit" class="btn btn-secondary">Export Filtered JSON</button>
+            </form>
 
             <div class="mt-3">
                 <h5>Select Columns to Export</h5>
                 <form method="get">
                     <div>
-                        <input type="checkbox" name="selectedColumns" value="ClassName" 
-                            @(Model.SelectedColumns.Contains("ClassName") ? "checked" : "") /> Class Name
-                        <input type="checkbox" name="selectedColumns" value="StudentCount" 
-                            @(Model.SelectedColumns.Contains("StudentCount") ? "checked" : "") /> Student Count
-                        <input type="checkbox" name="selectedColumns" value="Description" 
-                            @(Model.SelectedColumns.Contains("Description") ? "checked" : "") /> Description
+                        <input type="checkbox" name="selectedColumns" value="ClassName"
+                               @(Model.SelectedColumns.Contains("ClassName") ? "checked" : "") /> Class Name
+                        <input type="checkbox" name="selectedColumns" value="StudentCount"
+                               @(Model.SelectedColumns.Contains("StudentCount") ? "checked" : "") /> Student Count
+                        <input type="checkbox" name="selectedColumns" value="Description"
+                               @(Model.SelectedColumns.Contains("Description") ? "checked" : "") /> Description
                     </div>
                     <button type="submit" class="btn btn-secondary mt-2">Apply Filter</button>
                 </form>
             </div>
 
-
-            <!-- Sayfalama -->
             @if (Model.TotalPages > 1)
             {
                 <nav>
