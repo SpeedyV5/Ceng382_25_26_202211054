@@ -17,8 +17,20 @@ namespace ClassManagement.Pages
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
 
-        public IActionResult OnGet(string searchClassName, int? minStudents, int? maxStudents, int pageIndex = 1, int pageSize = 6)
+        public IActionResult OnGet(string searchClassName, int? minStudents, int? maxStudents, int pageIndex = 1, int pageSize =10)
         {
+            if (ClassList.Count == 0)
+            {
+                for (int i = 1; i <= 100; i++)
+                {
+                    ClassList.Add(new ClassInformationModel
+                    {
+                        ClassName = $"Sample Class {i}",
+                        StudentCount = 10 + (i % 50),
+                        Description = $"This is sample class number {i}"
+                    });
+                }
+            }
             var filteredList = ClassList.AsQueryable();
 
             // Filtreleme işlemleri
