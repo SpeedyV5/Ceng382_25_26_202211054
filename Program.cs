@@ -1,26 +1,44 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ClassManagement.Data; // DbContext'in olduğu namespace
+using ClassManagement.Data;
+using ClassManagement.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ➡️ Add services to the container:
-builder.Services.AddRazorPages();
+// ➡️ 1) Razor Pages + konvansiyonel koruma
+builder.Services
+  .AddRazorPages(options =>
+  {
+      // Index sayfasını ve tüm POST handler'larını koru:
+      options.Conventions.AuthorizePage("/Index");
+  });
 
-// ➡️ Add and configure the database context
-builder.Services.AddDbContext<SchoolDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
+// ➡️ 2) EF Core
+builder.Services.AddDbContext<SchoolDbContext>(opts =>
+    opts.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
 
-// ➡️ Add Session middleware
-builder.Services.AddSession(options =>
+// ➡️ 3) Identity
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opts =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
+    opts.SignIn.RequireConfirmedAccount = false;
+    // ... diğer ayarlar
+})
+.AddEntityFrameworkStores<SchoolDbContext>()
+.AddDefaultTokenProviders()
+.AddDefaultUI();
+
+// ➡️ 4) Cookie ayarları: redirect için doğru yol
+builder.Services.ConfigureApplicationCookie(opts =>
+{
+    opts.LoginPath = "/Identity/Account/Login";
+    opts.LogoutPath="/Identity/Account/Logout";
+    opts.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    opts.SlidingExpiration = true;
 });
 
 var app = builder.Build();
 
-// ➡️ Configure the HTTP request pipeline:
+// pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -29,9 +47,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 
-app.UseSession(); // Session middleware aktif
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
